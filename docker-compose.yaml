@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    container_name: backend_db
+    hostname: "${DB_HOST}"
+    environment:
+      - POSTGRES_DB=${DB_BASE}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    ports:
+      - "5432:5432"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend_api
+    volumes:
+      - .:/app/src
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
