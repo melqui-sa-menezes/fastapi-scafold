@@ -4,7 +4,8 @@ from sqlalchemy import (
     DECIMAL,
     Integer,
     String,
-    text
+    text,
+    TEXT
 )
 
 from app.db.base import Base
@@ -20,6 +21,6 @@ class Product(Base):
         server_default=text("gen_random_uuid()")
     )
     name = Column(String(256), nullable=False)
-    description = Column(String(256), nullable=False)
+    description = Column(TEXT, nullable=False)
     value = Column(DECIMAL(precision=10, scale=2), nullable=False)
     quantity = Column(Integer, nullable=False)
