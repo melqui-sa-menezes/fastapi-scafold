@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field, UUID4
+from typing import Optional
+
+from pydantic import BaseModel, Field, UUID4, validator
 
 
 class ProductCreateSchema(BaseModel):
@@ -16,3 +18,10 @@ class ProductSchema(ProductCreateSchema):
 
     class Config:
         orm_mode = True
+
+
+class ProductUpdateSchema(BaseModel):
+    name: Optional[str] = Field(None, description="")
+    description: Optional[str] = Field(None, description="")
+    value: Optional[float] = Field(None, description="")
+    quantity: Optional[int] = Field(None, description="")

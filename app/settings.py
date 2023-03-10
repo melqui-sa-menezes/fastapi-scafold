@@ -10,7 +10,7 @@ TEMP_DIR = Path(gettempdir())
 class Settings(pydantic.BaseSettings):
     """Application settings."""
 
-    service_name: str = "scafold-api"
+    service_name: str = "backend-api"
     host: str
     port: int
 

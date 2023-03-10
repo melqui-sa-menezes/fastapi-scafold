@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "fastapi-scafold"
+name = "mb_challenge"
 version = "0.1.0"
 description = "Python project skeleton made using FastAPI and its main libraries."
-authors = ["Melqui Menezes <melquizedeque@creditoexpress.com.br>"]
+authors = ["Melqui Menezes <melqui.menezes.dev@gmail.com>"]
 readme = "README.md"
-packages = [{include = "fastapi_scafold"}]
+packages = [{include = "mb_challenge"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"

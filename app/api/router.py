@@ -8,6 +8,6 @@ api_router.include_router(docs.router)
 
 api_router.include_router(
     product.router,
-    prefix="/my-api/v1",
+    prefix="/product",
     tags=["product"],
 )
