@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends
 
 from app.api.product.schemas import ProductCreateSchema, ProductUpdateSchema
@@ -15,11 +17,17 @@ class ProductService:
     async def create_product(self, payload: ProductCreateSchema):
         return await self.product_repository.create(Product(**payload.dict()))
 
-    async def get_all_products(self):
-        return await self.product_repository.get_all()
+    async def get_all_products(self, query_filter):
+        return await self.product_repository.get_all(query_filter=query_filter)
 
-    async def get_by_id(self, product_id):
+    async def get_by_product_id(self, product_id):
         return await self.product_repository.get_by_id(product_id)
 
-    async def update_by_product_id(self, product_id, data: dict):
-        return await self.product_repository.update_by_id(product_id, data)
+    async def update_by_product_id(
+            self,
+            product_id: UUID,
+            payload: ProductUpdateSchema
+    ):
+        updated_data = payload.dict(exclude_unset=True)
+        return await self.product_repository.update_by_id(
+            product_id, updated_data)

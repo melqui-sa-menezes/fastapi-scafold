@@ -15,6 +15,10 @@ build: ## Build project and apply migrations
 run: ## Up all containers and run app
 	docker compose up
 
+up: ## Up all containers and apply migrations
+	docker compose up -d
+	docker exec -it backend_api bash -c "alembic -x data=true upgrade head"
+
 stop: ## Stop all containers
 	docker compose stop
 
