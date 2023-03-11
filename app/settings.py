@@ -11,6 +11,7 @@ class Settings(pydantic.BaseSettings):
     """Application settings."""
 
     service_name: str = "backend-api"
+    api_version: str
     host: str
     port: int
 

@@ -33,23 +33,6 @@ class BaseRepository:
             await self.session.rollback()
             raise IntegrityException(f"{self.model.__name__} integrity error")
 
-    async def bulk_insert_objects(self, objects: list) -> None:
-        """Add many rows of a model to database."""
-        try:
-            self.session.add_all(objects)
-            await self.session.commit()
-        except IntegrityError:
-            await self.session.rollback()
-            raise IntegrityException(f"{self.model.__name__} integrity error")
-
-    async def bulk_update(self, models_ids: list, data_to_update: dict):
-        model_id = getattr(self.model, f"{self.model.__tablename__}_id")
-
-        blocks_updated = await self.session.execute(
-            update(self.model).filter(model_id.in_(models_ids)).values(data_to_update),
-        )
-        return blocks_updated  # noqa: WPS331
-
     async def get_all(
         self,
         query_filter=None,
@@ -110,14 +93,21 @@ class BaseRepository:
 
     async def update_by_id(self, id, data_to_update):
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")
-        await self.update((model_id == id), data_to_update)
+        await self.update(and_(
+                    model_id == id,
+                    self.model.deleted_at.is_(None),
+                ), data_to_update)
 
     async def _soft_delete(
         self,
         query_filter,
         data_to_update: dict,
         force_multiple_updates: bool = False,
-    ) -> None:
+    ) -> int:
+        query = select(self.model.deleted_at).where(query_filter)
+        result = await self.session.execute(query)
+        if result.scalar_one():
+            return 1
         return await self.update(
             query_filter,
             data_to_update,

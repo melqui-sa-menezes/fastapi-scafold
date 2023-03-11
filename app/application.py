@@ -37,7 +37,7 @@ def get_app() -> FastAPI:
     app = FastAPI(
         title="app",
         description="Product API for MB Challenge",
-        version="v0.1.0",
+        version=settings.api_version,
         docs_url=None,
         redoc_url=None,
         openapi_url="/openapi.json",

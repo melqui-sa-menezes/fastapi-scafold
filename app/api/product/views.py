@@ -86,7 +86,7 @@ async def update_by_product_id(
         status.HTTP_404_NOT_FOUND: {"model": NotFoundError},
     },
 )
-async def update_by_product_id(
+async def delete_by_product_id(
     product_id: UUID,
     product_service: ProductService = Depends(ProductService),
 ):
