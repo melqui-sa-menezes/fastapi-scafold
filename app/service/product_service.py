@@ -31,3 +31,6 @@ class ProductService:
         updated_data = payload.dict(exclude_unset=True)
         return await self.product_repository.update_by_id(
             product_id, updated_data)
+
+    async def delete_by_product_id(self, product_id: UUID):
+        return await self.product_repository.soft_delete_by_id(id=product_id)
