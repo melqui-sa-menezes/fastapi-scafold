@@ -13,7 +13,7 @@ from sqlalchemy.orm import configure_mappers, sessionmaker
 
 from app.settings import settings
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 
 class DBSession:

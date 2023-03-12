@@ -1,0 +1,19 @@
+[run]
+omit =
+    *__init__.py*
+    *schema.py*
+    *schemas.py*
+    app/conftest.py
+    app/api/router.py
+    app/settings.py
+    app/lifetime.py
+    app/application.py
+    app/db/dependencies.py
+    */app/api/docs/*
+    *test*
+    *tests*
+
+concurrency = greenlet
+
+[report]
+fail_under = 90

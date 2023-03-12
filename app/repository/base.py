@@ -5,8 +5,9 @@ from sqlalchemy import and_, func, select, update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncScalarResult, AsyncSession
 from sqlalchemy.sql.elements import BinaryExpression
+from starlette import status
 
-from app.api.helpers.exception import IntegrityException
+from app.api.helpers.exception import IntegrityException, HTTPError
 from app.db.base import Base
 
 
@@ -16,7 +17,7 @@ class BaseRepository:
     def __init__(self, session: AsyncSession, model: Base):
         self.session = session
         self.model = model
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
     async def create(self, base_model: Base) -> Base:
@@ -81,15 +82,27 @@ class BaseRepository:
         :raises NoResultFound: if not found
         :raises AssertionError: if not update
         """
-        result_query = await self.session.execute(
-            update(self.model).where(query_filter).values(data_to_update),
-        )
-        if result_query.rowcount == 0:
-            raise NoResultFound(f"{self.model.__name__} not found")
-        if not force_multiple_updates and result_query.rowcount > 1:
-            await self.session.rollback()
-            raise AssertionError("More than one row is being changed")
-        return result_query.rowcount
+        try:
+            result_query = await self.session.execute(
+                update(self.model).where(query_filter).values(data_to_update),
+            )
+            if result_query.rowcount == 0:
+                raise NoResultFound(f"{self.model.__name__} not found")
+            if not force_multiple_updates and result_query.rowcount > 1:
+                await self.session.rollback()
+                raise AssertionError("More than one row is being changed")
+            return result_query.rowcount
+        except IntegrityError as error:
+            status_code = (
+                status.HTTP_409_CONFLICT if "duplicate key" in error.args[0]
+                else status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+            raise HTTPError(
+                status_code=status_code,
+                error_message=f"{error.args[0].split('DETAIL')[-1]}"
+            )
+        except Exception as error:
+            raise Exception(f"{error}")
 
     async def update_by_id(self, id, data_to_update):
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")

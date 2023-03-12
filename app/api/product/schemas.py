@@ -19,7 +19,6 @@ class ProductCreateSchema(BaseModel):
         number_validator)
     _value_validator = validator("value", allow_reuse=True)(decimal_validator)
 
-
     class Config:
         orm_mode = True
 
@@ -36,3 +35,10 @@ class ProductUpdateSchema(BaseModel):
     description: Optional[str] = Field(None, description="")
     value: Optional[float] = Field(None, description="")
     quantity: Optional[int] = Field(None, description="")
+
+    _empty_string_validator = validator("name", "description",
+                                        allow_reuse=True)(
+        empty_string_validator)
+    _number_validator = validator("value", "quantity", allow_reuse=True)(
+        number_validator)
+    _value_validator = validator("value", allow_reuse=True)(decimal_validator)

@@ -37,3 +37,8 @@ migrate: ## Apply alembic migrations
 
 db:
 	docker compose up db -d
+
+test:
+	docker compose up -d
+	docker exec -it backend_api bash -c "pytest . --cov -v"
+	docker compose stop

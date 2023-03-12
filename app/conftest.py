@@ -5,8 +5,9 @@ from typing import AsyncGenerator, Callable
 import factory
 import pytest
 import pytest_asyncio
+from factory.fuzzy import FuzzyFloat
 from fastapi import FastAPI
-from httpx import AsyncClient, Headers
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -100,7 +101,7 @@ def product_factory(db_session):
         product_id = factory.Faker("uuid4")
         name = factory.Faker("name")
         description = factory.Faker("text")
-        value = factory.Faker("currency")
+        value = round(random.uniform(0, 10), 2)
         quantity = random.randint(1, 999)
 
     return ProductFactory

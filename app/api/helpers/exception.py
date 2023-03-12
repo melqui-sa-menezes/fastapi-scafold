@@ -10,18 +10,6 @@ class RelatedIntegrityError(Exception):
     pass
 
 
-class DomainException(Exception):
-    def __init__(self, message):
-        super().__init__(message)
-        self.error_code = "no_code"
-
-
-class InvalidTopicException(DomainException):
-    def __init__(self, message="Invalid topic."):
-        super().__init__(message)
-        self.error_code = "invalid_topic"
-
-
 class HTTPError(Exception):
     def __init__(
         self,

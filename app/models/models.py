@@ -20,7 +20,7 @@ class Product(Base):
         primary_key=True,
         server_default=text("gen_random_uuid()")
     )
-    name = Column(String(256), nullable=False)
+    name = Column(String(256), nullable=False, unique=True)
     description = Column(TEXT, nullable=False)
     value = Column(DECIMAL(precision=10, scale=2), nullable=False)
     quantity = Column(Integer, nullable=False)

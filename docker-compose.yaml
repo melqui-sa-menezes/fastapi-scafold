@@ -15,6 +15,7 @@ services:
   api:
     build:
       context: .
+      target: app-dev
       dockerfile: Dockerfile
     container_name: backend_api
     volumes:
