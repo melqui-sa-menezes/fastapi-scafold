@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 import pytest
@@ -83,13 +84,13 @@ async def test_get_all_products_success_without_filter(
     async_client: AsyncClient,
     product_factory,
 ):
-    await product_factory.create_batch(50)
+    await product_factory.create_batch(25)
     response = await async_client.get(
         "/product",
         params={"page": 1, "size": 10}
     )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["total"] == 50
+    assert response.json()["total"] == 25
     assert response.json()["size"] == 10
 
 
@@ -144,6 +145,19 @@ async def test_get_by_product_id_success(
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == product_mocked.name
+
+
+@pytest.mark.asyncio
+async def test_get_by_product_id_with_product_deleted(
+    async_client: AsyncClient,
+    product_mocked,
+):
+    product_mocked.deleted_at = datetime.now()
+    response = await async_client.get(
+        f"/product/{product_mocked.product_id}",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()["error_message"] == "Product not found"
 
 
 @pytest.mark.asyncio

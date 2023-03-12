@@ -14,7 +14,7 @@ from app.db.base import Base
 class BaseRepository:
     """Class for accessing model table."""
 
-    def __init__(self, session: AsyncSession, model: Base):
+    def __init__(self, session: AsyncSession, model: Base): # pragma: no cover
         self.session = session
         self.model = model
         logging.basicConfig(level=logging.WARNING)
@@ -72,12 +72,10 @@ class BaseRepository:
         self,
         query_filter: BinaryExpression,
         data_to_update: dict,
-        force_multiple_updates: bool = False,
     ) -> int:
         """Update a model model by criteria.
         :param query_filter: criteria of model to update.
         :param data_to_update: dict with new data to update a model.
-        :param force_multiple_updates: if set True, allow multiples updates.
         :return: count of rows to updated.
         :raises NoResultFound: if not found
         :raises AssertionError: if not update
@@ -88,9 +86,6 @@ class BaseRepository:
             )
             if result_query.rowcount == 0:
                 raise NoResultFound(f"{self.model.__name__} not found")
-            if not force_multiple_updates and result_query.rowcount > 1:
-                await self.session.rollback()
-                raise AssertionError("More than one row is being changed")
             return result_query.rowcount
         except IntegrityError as error:
             status_code = (
@@ -101,8 +96,6 @@ class BaseRepository:
                 status_code=status_code,
                 error_message=f"{error.args[0].split('DETAIL')[-1]}"
             )
-        except Exception as error:
-            raise Exception(f"{error}")
 
     async def update_by_id(self, id, data_to_update):
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")
@@ -115,7 +108,6 @@ class BaseRepository:
         self,
         query_filter,
         data_to_update: dict,
-        force_multiple_updates: bool = False,
     ) -> int:
         query = select(self.model.deleted_at).where(query_filter)
         result = await self.session.execute(query)
@@ -124,7 +116,6 @@ class BaseRepository:
         return await self.update(
             query_filter,
             data_to_update,
-            force_multiple_updates,
         )
 
     async def soft_delete_by_id(

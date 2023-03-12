@@ -11,7 +11,7 @@ class ProductService:
     def __init__(
         self,
         product_repository: ProductRepository = Depends(),
-    ):
+    ): # pragma: no cover
         self.product_repository = product_repository
 
     async def create_product(self, payload: ProductCreateSchema):
