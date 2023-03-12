@@ -1,3 +1,9 @@
+\
+<img src="https://img.shields.io/badge/python-3.9.6-blue"/>
+<img src="https://img.shields.io/badge/fastapi-0.93.0-orange"/>
+<img src="https://img.shields.io/badge/SQLAlchemy-2.0.5-blueviolet"/>
+<img src="https://img.shields.io/badge/coverage-92.24%25-green"/>
+
 # API de CRUD de Produtos
 Esta é uma API que permite criar, ler, atualizar e excluir produtos de uma tabela utilizando as tecnologias Python, FastAPI, SQLAlchemy, Alembic e Pydantic.
 
