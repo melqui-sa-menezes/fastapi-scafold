@@ -85,6 +85,35 @@ async def test_create_product_fail_with_existing_name(
 
 
 @pytest.mark.asyncio
+async def test_create_invalid_auth(
+    async_client: AsyncClient,
+    headers_invalid_token,
+    headers_expired_token
+):
+    response = await async_client.post(
+        "/product",
+        json=CORRECT_PAYLOAD,
+        headers=headers_invalid_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
+async def test_create_expired_auth(
+        async_client: AsyncClient,
+        headers_expired_token
+):
+    response = await async_client.post(
+        "/product",
+        json=CORRECT_PAYLOAD,
+        headers=headers_expired_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
 async def test_get_all_products_success_without_filter(
     async_client: AsyncClient,
     product_factory,
@@ -99,6 +128,40 @@ async def test_get_all_products_success_without_filter(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 25
     assert response.json()["size"] == 10
+
+
+@pytest.mark.asyncio
+async def test_get_all_products_invalid_auth(
+    async_client: AsyncClient,
+    product_factory,
+    headers_invalid_token
+):
+    await product_factory.create_batch(25)
+    response = await async_client.get(
+        "/product",
+        params={"page": 1, "size": 10},
+        headers=headers_invalid_token
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
+async def test_get_all_products_expired_auth(
+    async_client: AsyncClient,
+    product_factory,
+    headers_expired_token
+):
+    await product_factory.create_batch(25)
+    response = await async_client.get(
+        "/product",
+        params={"page": 1, "size": 10},
+        headers=headers_expired_token
+    )
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
 
 
 @pytest.mark.asyncio
@@ -169,6 +232,34 @@ async def test_get_by_product_id_success(
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == product_mocked.name
+
+
+@pytest.mark.asyncio
+async def test_get_by_product_invalid_token(
+    async_client: AsyncClient,
+    product_mocked,
+    headers_invalid_token
+):
+    response = await async_client.get(
+        f"/product/{product_mocked.product_id}",
+        headers=headers_invalid_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
+async def test_get_by_product_expired_token(
+    async_client: AsyncClient,
+    product_mocked,
+    headers_expired_token
+):
+    response = await async_client.get(
+        f"/product/{product_mocked.product_id}",
+        headers=headers_expired_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
 
 
 @pytest.mark.asyncio
@@ -316,6 +407,38 @@ async def test_update_with_existing_name(
 
 
 @pytest.mark.asyncio
+async def test_update_by_product_id_with_invalid_token(
+    async_client: AsyncClient,
+    headers_invalid_token,
+    product_mocked,
+):
+    data_update = {"name": "Novo Nome"}
+    response = await async_client.patch(
+        f"/product/{product_mocked.product_id}",
+        json=data_update,
+        headers=headers_invalid_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
+async def test_update_by_product_id_with_expired_token(
+    async_client: AsyncClient,
+    headers_expired_token,
+    product_mocked,
+):
+    data_update = {"name": "Novo Nome"}
+    response = await async_client.patch(
+        f"/product/{product_mocked.product_id}",
+        json=data_update,
+        headers=headers_expired_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
 async def test_delete_product_success(
     async_client: AsyncClient,
     db_session,
@@ -362,3 +485,31 @@ async def test_delete_product_success_deleted_at_unchanged(
     query_set = await db_session.execute(statement)
     second_product_db = query_set.scalar_one_or_none()
     assert second_product_db.deleted_at == first_product_db.deleted_at
+
+
+@pytest.mark.asyncio
+async def test_delete_product_with_invalid_token(
+    async_client: AsyncClient,
+    product_mocked,
+    headers_invalid_token
+):
+    response = await async_client.delete(
+        f"/product/{product_mocked.product_id}",
+        headers=headers_invalid_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"
+
+
+@pytest.mark.asyncio
+async def test_delete_product_with_expired_token(
+    async_client: AsyncClient,
+    product_mocked,
+    headers_expired_token
+):
+    response = await async_client.delete(
+        f"/product/{product_mocked.product_id}",
+        headers=headers_expired_token
+    )
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json()["error_message"] == "Invalid token"

@@ -120,3 +120,21 @@ def headers():
         {"Authorization": f"Bearer {token}", "s3-context": "mock_s3"},
     )
 
+
+@pytest.fixture
+def headers_invalid_token():
+    return Headers(
+        {"Authorization": "Bearer ABRACADABRA", "s3-context": "mock_s3"},
+    )
+
+
+@pytest.fixture
+def headers_expired_token():
+    expired_token = """
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+    eyJzdWIiOiJtZWxxdWkgbWVuZXplcyIsImV4c
+    CI6MTY3ODc0Njk2M30.1O4b_4Ja40_MFx_Wjjg-hk_bC20SAPgXiBSzf2cXMkE
+    """
+    return Headers(
+        {"Authorization": f"Bearer {expired_token}", "s3-context": "mock_s3"},
+    )

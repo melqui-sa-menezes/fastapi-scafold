@@ -79,7 +79,7 @@ from app.api.product.schemas import (
         (
             ProductUpdateSchema,
             {"name": "", "description": "", "value": "invalid", "quantity": "invalid"},
-            {"name": None, "description": None, "value": None, "quantity": None},
+            ValidationError,
         ),
     ],
 )

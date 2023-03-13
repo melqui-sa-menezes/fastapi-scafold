@@ -2,7 +2,7 @@
 <img src="https://img.shields.io/badge/python-3.9.6-blue"/>
 <img src="https://img.shields.io/badge/fastapi-0.93.0-orange"/>
 <img src="https://img.shields.io/badge/SQLAlchemy-2.0.5-blueviolet"/>
-<img src="https://img.shields.io/badge/coverage-96.33%25-darkgreen"/>
+<img src="https://img.shields.io/badge/coverage-96.65%25-darkgreen"/>
 
 # API de CRUD de Produtos
 Esta é uma API que permite criar, ler, atualizar e excluir produtos de uma tabela utilizando as tecnologias Python, FastAPI, SQLAlchemy, Alembic e Pydantic.
@@ -54,6 +54,11 @@ make stop
 Caso queira parar e remover os containers, execute o seguinte comando:
 ```commandline
 make down
+```
+### Rodando os testes
+Para execução dos testes unitários e de integração, execute o seguinte comando:
+```commandline
+make test
 ```
 
 ## Migrações do Banco de Dados
