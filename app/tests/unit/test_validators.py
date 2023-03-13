@@ -1,6 +1,10 @@
 import pytest
 
-from app.api.helpers.validators import empty_string_validator, decimal_validator, number_validator
+from app.api.helpers.validators import (
+    decimal_validator,
+    empty_string_validator,
+    number_validator,
+)
 
 
 def test_empty_string_validator():

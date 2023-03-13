@@ -42,3 +42,7 @@ test:
 	docker compose up -d
 	docker exec -it backend_api bash -c "pytest . --cov -v"
 	docker compose stop
+
+lint:
+	isort .
+	black .

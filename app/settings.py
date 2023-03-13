@@ -1,8 +1,8 @@
 from pathlib import Path
 from tempfile import gettempdir
-from yarl import URL
 
 import pydantic
+from yarl import URL
 
 TEMP_DIR = Path(gettempdir())
 
@@ -62,7 +62,6 @@ class Settings(pydantic.BaseSettings):
             password=self.db_pass,
             path=f"/{self.db_base}",
         )
-
 
     class Config:
         env_file = ".env"

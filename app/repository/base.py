@@ -7,14 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncScalarResult, AsyncSession
 from sqlalchemy.sql.elements import BinaryExpression
 from starlette import status
 
-from app.api.helpers.exception import IntegrityException, HTTPError
+from app.api.helpers.exception import HTTPError, IntegrityException
 from app.db.base import Base
 
 
 class BaseRepository:
     """Class for accessing model table."""
 
-    def __init__(self, session: AsyncSession, model: Base): # pragma: no cover
+    def __init__(self, session: AsyncSession, model: Base):  # pragma: no cover
         self.session = session
         self.model = model
         logging.basicConfig(level=logging.WARNING)
@@ -89,20 +89,24 @@ class BaseRepository:
             return result_query.rowcount
         except IntegrityError as error:
             status_code = (
-                status.HTTP_409_CONFLICT if "duplicate key" in error.args[0]
+                status.HTTP_409_CONFLICT
+                if "duplicate key" in error.args[0]
                 else status.HTTP_422_UNPROCESSABLE_ENTITY
             )
             raise HTTPError(
                 status_code=status_code,
-                error_message=f"{error.args[0].split('DETAIL')[-1]}"
+                error_message=f"{error.args[0].split('DETAIL')[-1]}",
             )
 
     async def update_by_id(self, id, data_to_update):
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")
-        await self.update(and_(
-                    model_id == id,
-                    self.model.deleted_at.is_(None),
-                ), data_to_update)
+        await self.update(
+            and_(
+                model_id == id,
+                self.model.deleted_at.is_(None),
+            ),
+            data_to_update,
+        )
 
     async def _soft_delete(
         self,
@@ -121,7 +125,8 @@ class BaseRepository:
     async def soft_delete_by_id(
         self,
         id: str,
-        data_to_update: dict = {"deleted_at": func.now()},
+        data_to_update: dict,
     ) -> None:
+        data_to_update.update({"deleted_at": func.now()})
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")
         await self._soft_delete((model_id == id), data_to_update)

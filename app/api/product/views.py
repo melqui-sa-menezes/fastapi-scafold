@@ -6,8 +6,11 @@ from fastapi_pagination import Page
 
 from app.api.error_response.schema import MessageError, NotFoundError
 from app.api.helpers.query_parameters import product_query_parameters
-from app.api.product.schemas import ProductCreateSchema, ProductUpdateSchema, \
-    ProductSchema
+from app.api.product.schemas import (
+    ProductCreateSchema,
+    ProductSchema,
+    ProductUpdateSchema,
+)
 from app.service.product_service import ProductService
 
 router = APIRouter()
@@ -37,12 +40,10 @@ async def get_all(
     product_service: ProductService = Depends(ProductService),
     product_id: Optional[UUID] = None,
     name: Optional[str] = None,
-    description: Optional[str] = None
+    description: Optional[str] = None,
 ):
     query_filter = product_query_parameters(
-        product_id=product_id,
-        name=name,
-        description=description
+        product_id=product_id, name=name, description=description
     )
     return await product_service.get_all_products(query_filter=query_filter)
 

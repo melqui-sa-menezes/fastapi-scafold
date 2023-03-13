@@ -17,10 +17,10 @@ def product_query_parameters(
         query.append(Product.product_id == product_id)
 
     if name:
-        query.append(Product.name.ilike(f'%{name}%'))
+        query.append(Product.name.ilike(f"%{name}%"))
 
     if description:
-        query.append(Product.description.ilike(f'%{description}%'))
+        query.append(Product.description.ilike(f"%{description}%"))
 
     query.append(Product.deleted_at.is_(None))
 

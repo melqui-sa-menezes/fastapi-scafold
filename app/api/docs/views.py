@@ -6,7 +6,6 @@ from fastapi.openapi.docs import (
 )
 from fastapi.responses import HTMLResponse
 
-
 router = APIRouter()
 
 

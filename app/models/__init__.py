@@ -12,4 +12,3 @@ def load_all_models() -> None:
     )
     for module in modules:
         __import__(module.name)
-        

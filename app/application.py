@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
 from loguru import logger
-
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.helpers.handler import register_exception_handlers

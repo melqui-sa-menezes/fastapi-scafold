@@ -43,16 +43,11 @@ async def test_create_product_success(
     ],
 )
 async def test_create_product_fail_with_invalid_value_in_field(
-    async_client: AsyncClient,
-    data_update,
-    msg_error
+    async_client: AsyncClient, data_update, msg_error
 ):
     payload = CORRECT_PAYLOAD
     payload.update(data_update)
-    response = await async_client.post(
-        "/product",
-        json=payload
-    )
+    response = await async_client.post("/product", json=payload)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json()["error_message"][0]["msg"] == msg_error
 
@@ -66,12 +61,9 @@ async def test_create_product_fail_with_existing_name(
         "name": product_mocked.name,
         "description": "Descrição qualquer do produto",
         "value": 529.89,
-        "quantity": 73
+        "quantity": 73,
     }
-    response = await async_client.post(
-        "/product",
-        json=payload
-    )
+    response = await async_client.post("/product", json=payload)
     print(f"updated_payload: {payload}")
     print(response.json())
     assert response.status_code == status.HTTP_409_CONFLICT
@@ -85,10 +77,7 @@ async def test_get_all_products_success_without_filter(
     product_factory,
 ):
     await product_factory.create_batch(25)
-    response = await async_client.get(
-        "/product",
-        params={"page": 1, "size": 10}
-    )
+    response = await async_client.get("/product", params={"page": 1, "size": 10})
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 25
     assert response.json()["size"] == 10
@@ -99,12 +88,15 @@ async def test_get_all_products_success_with_filter_name(
     async_client: AsyncClient,
     product_factory,
 ):
-    await product_factory.create(name="Camisa Adidas Running", description="Camisa feita para corrida")
-    await product_factory.create(name="Bermuda Adidas Running", description="Bermuda feita para corrida")
+    await product_factory.create(
+        name="Camisa Adidas Running", description="Camisa feita para corrida"
+    )
+    await product_factory.create(
+        name="Bermuda Adidas Running", description="Bermuda feita para corrida"
+    )
 
     response = await async_client.get(
-        "/product",
-        params={"name": "Adidas", "page": 1, "size": 10}
+        "/product", params={"name": "Adidas", "page": 1, "size": 10}
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 2
@@ -115,21 +107,25 @@ async def test_get_all_products_success_with_filter_description_and_product_id(
     async_client: AsyncClient,
     product_factory,
 ):
-    await product_factory.create(name="Camisa Adidas Running", description="Camisa feita para corrida")
-    await product_factory.create(name="Bermuda Adidas Running", description="Bermuda feita para corrida")
-    await product_factory.create(name="Tênis Nike Wiflo", description="Tênis feito para corrida")
+    await product_factory.create(
+        name="Camisa Adidas Running", description="Camisa feita para corrida"
+    )
+    await product_factory.create(
+        name="Bermuda Adidas Running", description="Bermuda feita para corrida"
+    )
+    await product_factory.create(
+        name="Tênis Nike Wiflo", description="Tênis feito para corrida"
+    )
 
     response = await async_client.get(
-        "/product",
-        params={"description": "Corrida", "page": 1, "size": 10}
+        "/product", params={"description": "Corrida", "page": 1, "size": 10}
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 3
 
     product_id = response.json()["items"][0]["product_id"]
     response = await async_client.get(
-        "/product",
-        params={"product_id": product_id, "page": 1, "size": 10}
+        "/product", params={"product_id": product_id, "page": 1, "size": 10}
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 1
@@ -186,10 +182,14 @@ async def test_get_by_product_id_invalid(
 @pytest.mark.parametrize(
     "data_update, field, result",
     [
-        ({"name": "Novo Nome"}, "name","Novo Nome"),
+        ({"name": "Novo Nome"}, "name", "Novo Nome"),
         ({"value": 23.75}, "value", 23.75),
         ({"quantity": 1}, "quantity", 1),
-        ({"description": "Descrição atualizada"}, "description", "Descrição atualizada"),
+        (
+            {"description": "Descrição atualizada"},
+            "description",
+            "Descrição atualizada",
+        ),
     ],
     ids=[
         "Deve atualizar somente name",
@@ -199,11 +199,7 @@ async def test_get_by_product_id_invalid(
     ],
 )
 async def test_update_by_product_id(
-    async_client: AsyncClient,
-    product_mocked,
-    data_update,
-    field,
-    result
+    async_client: AsyncClient, product_mocked, data_update, field, result
 ):
     response = await async_client.patch(
         f"/product/{product_mocked.product_id}",
@@ -239,21 +235,17 @@ async def test_update_by_product_id(
     ],
 )
 async def test_update_product_fail_with_invalid_value_in_field(
-    async_client: AsyncClient,
-    product_mocked,
-    data_update,
-    msg_error
+    async_client: AsyncClient, product_mocked, data_update, msg_error
 ):
     payload = {
         "name": product_mocked.name,
         "description": "Descrição qualquer do produto",
         "value": 529.89,
-        "quantity": 73
+        "quantity": 73,
     }
     payload.update(data_update)
     response = await async_client.patch(
-        f"/product/{product_mocked.product_id}",
-        json=payload
+        f"/product/{product_mocked.product_id}", json=payload
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json()["error_message"][0]["msg"] == msg_error
@@ -316,5 +308,3 @@ async def test_delete_product_success_deleted_at_unchanged(
     query_set = await db_session.execute(statement)
     second_product_db = query_set.scalar_one_or_none()
     assert second_product_db.deleted_at == first_product_db.deleted_at
-
-

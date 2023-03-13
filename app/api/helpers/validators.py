@@ -7,7 +7,7 @@ def empty_string_validator(text):
 def decimal_validator(number):
     if len(str(number).split(".")[-1]) > 2:
         raise ValueError("The value cannot have more than two decimal places")
-    if len(str(number).replace('.', '')) > 10:
+    if len(str(number).replace(".", "")) > 10:
         raise ValueError("The value exceeds the expected size.")
     return number
 
