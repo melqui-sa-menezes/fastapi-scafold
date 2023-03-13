@@ -13,10 +13,12 @@ from app.tests.integration.stubs import CORRECT_PAYLOAD
 @pytest.mark.asyncio
 async def test_create_product_success(
     async_client: AsyncClient,
+    headers,
 ):
     response = await async_client.post(
         "/product",
         json=CORRECT_PAYLOAD,
+        headers=headers
     )
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["name"] == "Produto Teste"
@@ -43,11 +45,18 @@ async def test_create_product_success(
     ],
 )
 async def test_create_product_fail_with_invalid_value_in_field(
-    async_client: AsyncClient, data_update, msg_error
+    async_client: AsyncClient,
+    data_update,
+    msg_error,
+    headers
 ):
     payload = CORRECT_PAYLOAD
     payload.update(data_update)
-    response = await async_client.post("/product", json=payload)
+    response = await async_client.post(
+        "/product",
+        json=payload,
+        headers=headers
+    )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json()["error_message"][0]["msg"] == msg_error
 
@@ -56,6 +65,7 @@ async def test_create_product_fail_with_invalid_value_in_field(
 async def test_create_product_fail_with_existing_name(
     async_client: AsyncClient,
     product_mocked,
+    headers
 ):
     payload = {
         "name": product_mocked.name,
@@ -63,9 +73,12 @@ async def test_create_product_fail_with_existing_name(
         "value": 529.89,
         "quantity": 73,
     }
-    response = await async_client.post("/product", json=payload)
-    print(f"updated_payload: {payload}")
-    print(response.json())
+    response = await async_client.post(
+        "/product",
+        json=payload,
+        headers=headers
+    )
+
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json()["error_code"] == "conflict"
     assert response.json()["error_message"] == "Product integrity error"
@@ -75,9 +88,14 @@ async def test_create_product_fail_with_existing_name(
 async def test_get_all_products_success_without_filter(
     async_client: AsyncClient,
     product_factory,
+    headers
 ):
     await product_factory.create_batch(25)
-    response = await async_client.get("/product", params={"page": 1, "size": 10})
+    response = await async_client.get(
+        "/product",
+        params={"page": 1, "size": 10},
+        headers=headers
+    )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 25
     assert response.json()["size"] == 10
@@ -87,6 +105,7 @@ async def test_get_all_products_success_without_filter(
 async def test_get_all_products_success_with_filter_name(
     async_client: AsyncClient,
     product_factory,
+    headers
 ):
     await product_factory.create(
         name="Camisa Adidas Running", description="Camisa feita para corrida"
@@ -96,7 +115,9 @@ async def test_get_all_products_success_with_filter_name(
     )
 
     response = await async_client.get(
-        "/product", params={"name": "Adidas", "page": 1, "size": 10}
+        "/product",
+        params={"name": "Adidas", "page": 1, "size": 10},
+        headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 2
@@ -106,6 +127,7 @@ async def test_get_all_products_success_with_filter_name(
 async def test_get_all_products_success_with_filter_description_and_product_id(
     async_client: AsyncClient,
     product_factory,
+    headers
 ):
     await product_factory.create(
         name="Camisa Adidas Running", description="Camisa feita para corrida"
@@ -118,14 +140,18 @@ async def test_get_all_products_success_with_filter_description_and_product_id(
     )
 
     response = await async_client.get(
-        "/product", params={"description": "Corrida", "page": 1, "size": 10}
+        "/product",
+        params={"description": "Corrida", "page": 1, "size": 10},
+        headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 3
 
     product_id = response.json()["items"][0]["product_id"]
     response = await async_client.get(
-        "/product", params={"product_id": product_id, "page": 1, "size": 10}
+        "/product",
+        params={"product_id": product_id, "page": 1, "size": 10},
+        headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["total"] == 1
@@ -135,9 +161,11 @@ async def test_get_all_products_success_with_filter_description_and_product_id(
 async def test_get_by_product_id_success(
     async_client: AsyncClient,
     product_mocked,
+    headers
 ):
     response = await async_client.get(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == product_mocked.name
@@ -147,10 +175,12 @@ async def test_get_by_product_id_success(
 async def test_get_by_product_id_with_product_deleted(
     async_client: AsyncClient,
     product_mocked,
+    headers
 ):
     product_mocked.deleted_at = datetime.now()
     response = await async_client.get(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["error_message"] == "Product not found"
@@ -159,9 +189,11 @@ async def test_get_by_product_id_with_product_deleted(
 @pytest.mark.asyncio
 async def test_get_by_product_id_not_found(
     async_client: AsyncClient,
+    headers
 ):
     response = await async_client.get(
         f"/product/{uuid4()}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["error_message"] == "Product not found"
@@ -170,9 +202,11 @@ async def test_get_by_product_id_not_found(
 @pytest.mark.asyncio
 async def test_get_by_product_id_invalid(
     async_client: AsyncClient,
+    headers
 ):
     response = await async_client.get(
         "/product/72",
+        headers=headers
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json()["error_message"][0]["msg"] == "value is not a valid uuid"
@@ -199,16 +233,23 @@ async def test_get_by_product_id_invalid(
     ],
 )
 async def test_update_by_product_id(
-    async_client: AsyncClient, product_mocked, data_update, field, result
+    async_client: AsyncClient,
+    headers,
+    product_mocked,
+    data_update,
+    field,
+    result
 ):
     response = await async_client.patch(
         f"/product/{product_mocked.product_id}",
         json=data_update,
+        headers=headers
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     response = await async_client.get(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json()[field] == result
@@ -235,7 +276,11 @@ async def test_update_by_product_id(
     ],
 )
 async def test_update_product_fail_with_invalid_value_in_field(
-    async_client: AsyncClient, product_mocked, data_update, msg_error
+    async_client: AsyncClient,
+    headers,
+    product_mocked,
+    data_update,
+    msg_error
 ):
     payload = {
         "name": product_mocked.name,
@@ -245,7 +290,9 @@ async def test_update_product_fail_with_invalid_value_in_field(
     }
     payload.update(data_update)
     response = await async_client.patch(
-        f"/product/{product_mocked.product_id}", json=payload
+        f"/product/{product_mocked.product_id}",
+        json=payload,
+        headers=headers
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.json()["error_message"][0]["msg"] == msg_error
@@ -256,12 +303,14 @@ async def test_update_with_existing_name(
     async_client: AsyncClient,
     product_mocked,
     product_factory,
+    headers
 ):
     other_product = await product_factory.create()
     payload = {"name": product_mocked.name}
     response = await async_client.patch(
         f"/product/{other_product.product_id}",
         json=payload,
+        headers=headers
     )
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -271,9 +320,11 @@ async def test_delete_product_success(
     async_client: AsyncClient,
     db_session,
     product_mocked,
+    headers
 ):
     response = await async_client.delete(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -288,9 +339,11 @@ async def test_delete_product_success_deleted_at_unchanged(
     async_client: AsyncClient,
     db_session,
     product_mocked,
+    headers
 ):
     response = await async_client.delete(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -301,6 +354,7 @@ async def test_delete_product_success_deleted_at_unchanged(
 
     response = await async_client.delete(
         f"/product/{product_mocked.product_id}",
+        headers=headers
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 

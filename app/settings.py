@@ -15,6 +15,9 @@ class Settings(pydantic.BaseSettings):
     host: str
     port: int
 
+    jwt_secret_key: str
+    algorithm: str
+
     # quantity of workers for uvicorn
     workers_count: int
 

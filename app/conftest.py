@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 from factory.fuzzy import FuzzyFloat
 from fastapi import FastAPI
-from httpx import AsyncClient
+from httpx import AsyncClient, Headers
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import sessionmaker
 
+from app.api.helpers.jwt_utils import create_token
 from app.db.base import Base
 from app.db.dependencies import db_session as dependency_db_session
 from app.models.models import Product
@@ -110,3 +111,12 @@ def product_factory(db_session):
 @pytest_asyncio.fixture
 async def product_mocked(product_factory):
     return await product_factory.create()
+
+
+@pytest.fixture
+def headers():
+    token = create_token(username="Itachi Uchiha")
+    return Headers(
+        {"Authorization": f"Bearer {token}", "s3-context": "mock_s3"},
+    )
+

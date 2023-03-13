@@ -125,8 +125,7 @@ class BaseRepository:
     async def soft_delete_by_id(
         self,
         id: str,
-        data_to_update: dict,
     ) -> None:
-        data_to_update.update({"deleted_at": func.now()})
+        data_to_update = {"deleted_at": func.now()}
         model_id = getattr(self.model, f"{self.model.__tablename__}_id")
         await self._soft_delete((model_id == id), data_to_update)
