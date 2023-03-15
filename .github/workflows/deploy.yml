@@ -1,6 +1,7 @@
-name: Deploy to AWS Elastic Beanstalk
+name: Deploy to EC2
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -18,20 +19,36 @@ jobs:
       with:
         python-version: 3.x
 
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        poetry install --no-dev
 
-    - name: Deploy to Elastic Beanstalk
-      uses: einaregilsson/beanstalk-deploy@v15
+    - name: Get secrets
+      id: secrets
+      uses: aws-actions/secrets-manager-get-secret-value@v1
       with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS }}
-        application_name: mb-challenge-api
-        environment_name: development
-        version_label: ${{ github.run_id }}
-        region: us-east-1
-        deployment_package: deployment.zip
+        aws-region: us-east-1
+        secret-id: challenge-mb
+
+    - name: Check PEM
+      run: |
+        echo "${{ steps.secrets.outputs.SecretString }}"
+
+    - name: Create deployment package
       run: |
         zip -r deployment.zip .
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ steps.secrets.outputs.SecretString }}
+        script: |
+          /home/ubuntu/mb-challenge
+          unzip -o ~/deployment.zip

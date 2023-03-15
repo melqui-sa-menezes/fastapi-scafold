@@ -35,14 +35,18 @@ migrate: ## Apply alembic migrations
 	docker exec -it backend_api bash -c "alembic -x data=true upgrade head"
 	docker compose stop
 
-db:
+db: ## Up database only
 	docker compose up db -d
 
-test:
+test: ## Run all test with coverage
 	docker compose up -d
 	docker exec -it backend_api bash -c "pytest . --cov -v"
 	docker compose stop
 
-lint:
+lint: ## Apply lint code in all project
 	isort .
 	black .
+
+token:
+	@echo $(shell python -c "from app.api.helpers.jwt_utils import create_token; print(create_token('user'))")
+
