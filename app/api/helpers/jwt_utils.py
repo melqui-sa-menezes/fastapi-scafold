@@ -4,12 +4,13 @@ from jose import jwt
 from app.settings import settings
 
 
-def create_token(username: str) -> str:
+def create_token(username: str) -> dict:
     payload = {
         "sub": username,
         "exp": datetime.utcnow() + timedelta(minutes=60),
     }
-    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.algorithm)
+    token = jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.algorithm)
+    return {"access_token": token}
 
 
 def decode_token(token: str):
